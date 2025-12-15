@@ -4,7 +4,7 @@ import Genre from '../../models/Genre';
 export const genreResolver: IResolvers = {
   Query: {
     genres: async () => {
-      return await Genre.find({ isDeleted: false });
+      return await Genre.find({ isArchived: false });
     }
   },
   Mutation: {

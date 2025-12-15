@@ -34,6 +34,26 @@ const typeDefs = gql`
     favoriteMovies: [Movie!]!
   }
 
+  enum NotificationType {
+    NEW_REVIEW
+    REVIEW_REPLY
+    NEW_MOVIE
+    SYSTEM
+  }
+
+  type Notification {
+    id: ID!
+    userId: ID!
+    type: NotificationType!
+    title: String!
+    message: String!
+    payload: String
+    isRead: Boolean!
+    isDeleted: Boolean!
+    createdAt: String!
+    updatedAt: String!
+  }
+
   input MovieInput {
     title: String!
     description: String!
@@ -54,6 +74,14 @@ const typeDefs = gql`
     comment: String
   }
 
+  input NotificationInput {
+    userId: ID!
+    type: NotificationType!
+    title: String!
+    message: String!
+    payload: String
+  }
+
   type AuthPayload {
     user: User!
     token: String!
@@ -65,6 +93,8 @@ const typeDefs = gql`
     genres: [Genre!]!
     reviewsByMovie(movieId: ID!): [Review!]!
     me: User
+    notifications: [Notification!]!
+    unreadNotificationsCount: Int!
   }
 
   type Mutation {
@@ -73,18 +103,17 @@ const typeDefs = gql`
     createReview(input: ReviewInput!): Review!
     register(email: String!, username: String!, password: String!): AuthPayload!
     login(email: String!, password: String!): AuthPayload!
+    createNotification(input: NotificationInput!): Notification!
+    markNotificationAsRead(id: ID!): Notification!
+    markAllNotificationsAsRead: Boolean!
+    deleteNotification(id: ID!): Notification!
+    toggleFavoriteGenre(genreId: ID!): User!
   }
-    type Subscription {
-  notificationCreated: Notification!
-}
 
-type Notification {
-  id: ID!
-  message: String!
-  movie: Movie
-  user: User
-}
-
+  type Subscription {
+    notificationCreated: Notification!
+    movieAddedToFavoriteGenre: Movie!
+  }
 `;
 
 export default typeDefs;

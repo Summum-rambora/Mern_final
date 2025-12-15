@@ -7,7 +7,7 @@ export interface IUser {
   role: 'USER' | 'ADMIN';
   favoriteGenres: Types.ObjectId[];
   favoriteMovies: Types.ObjectId[];
-  isDeleted: boolean;
+  isDeleted: boolean; 
 }
 
 const UserSchema = new Schema<IUser>(
