@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",                         
+    "module": "commonjs",                       
+    "rootDir": "./src",                          
+    "outDir": "./dist",                          
+    "strict": true,                              
+    "esModuleInterop": true,                     
+    "forceConsistentCasingInFileNames": true,   
+    "skipLibCheck": true,                        
+    "moduleResolution": "node",                  
+    "resolveJsonModule": true,                   
+    "baseUrl": "./",                             
+    "paths": {                                   
+      "@models/*": ["src/models/*"],
+      "@graphql/*": ["src/graphql/*"],
+      "@services/*": ["src/services/*"],
+      "@utils/*": ["src/utils/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
