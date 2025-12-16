@@ -1,7 +1,15 @@
 import Notification from '../models/Notification';
 import { Types } from 'mongoose';
 
-export const createNotification = async (input: any) => {
+interface CreateNotificationInput {
+  userId: string | Types.ObjectId;
+  type: 'NEW_REVIEW' | 'NEW_MOVIE_IN_GENRE' | 'REVIEW_REPLY' | 'SYSTEM';
+  title: string;
+  message: string;
+  payload?: string;
+}
+
+export const createNotification = async (input: CreateNotificationInput) => {
   const notification = await Notification.create(input);
   return notification;
 };

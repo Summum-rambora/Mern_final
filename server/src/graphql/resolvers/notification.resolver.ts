@@ -6,18 +6,18 @@ export const notificationResolvers = {
       if (!user) throw new Error("Not authenticated");
 
       return Notification.find({
-        userId: user.id,
+        user: user.id,
         isDeleted: false,
       })
         .sort({ createdAt: -1 })
-        .populate("userId");
+        .populate("user");
     },
 
     unreadNotificationsCount: async (_: any, __: any, { user }: any) => {
       if (!user) throw new Error("Not authenticated");
 
       return Notification.countDocuments({
-        userId: user.id,
+        user: user.id,
         isRead: false,
         isDeleted: false,
       });
@@ -29,7 +29,7 @@ export const notificationResolvers = {
       if (!user) throw new Error("Not authenticated");
 
       const notification = await Notification.findOneAndUpdate(
-        { _id: id, userId: user.id },
+        { _id: id, user: user.id },
         { isRead: true },
         { new: true }
       );
@@ -43,7 +43,7 @@ export const notificationResolvers = {
       if (!user) throw new Error("Not authenticated");
 
       await Notification.updateMany(
-        { userId: user.id, isRead: false },
+        { user: user.id, isRead: false },
         { isRead: true }
       );
 
@@ -53,7 +53,7 @@ export const notificationResolvers = {
 
   Notification: {
     user: async (parent: any) => {
-      return parent.userId;
+      return parent.user;
     },
   },
 };

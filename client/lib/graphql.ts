@@ -54,7 +54,6 @@ export const CREATE_MOVIE = gql`
   }
 `;
 
-
 export const GET_GENRES = gql`
   query GetGenres {
     genres {
@@ -65,13 +64,13 @@ export const GET_GENRES = gql`
   }
 `;
 
-
 export const GET_REVIEWS_BY_MOVIE = gql`
   query GetReviewsByMovie($movieId: ID!) {
     reviewsByMovie(movieId: $movieId) {
       id
       rating
       comment
+      createdAt
       user {
         id
         username
@@ -86,10 +85,14 @@ export const CREATE_REVIEW = gql`
       id
       rating
       comment
+      createdAt
+      user {
+        id
+        username
+      }
     }
   }
 `;
-
 
 export const LOGIN = gql`
   mutation Login($email: String!, $password: String!) {
@@ -134,6 +137,9 @@ export const GET_ME = gql`
       favoriteMovies {
         id
         title
+        releaseYear
+        duration
+        ratingAvg
       }
     }
   }

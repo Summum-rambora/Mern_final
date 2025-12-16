@@ -20,7 +20,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-secondary/95 backdrop-blur-xl border-b border-border/50 shadow-glow">
-      <nav className="container-smooth py-5">
+      <nav className="container-smooth py-3">
         <div className="flex items-center justify-between">
           {/* Логотип */}
           <Link href="/" className="flex items-center gap-4 group">
@@ -31,7 +31,7 @@ export default function Header() {
               <div className="absolute -inset-2 bg-gradient-to-r from-primary to-accent rounded-2xl opacity-0 group-hover:opacity-30 blur-md transition-all duration-500"></div>
             </div>
             <div className="flex flex-col gap-0.5">
-              <span className="text-2xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+              <span className="text-2xl font-bold bg-gradient-to-r from-[#FF5722] via-[#FF9800] to-[#FF5722] bg-clip-text text-transparent">
                 CinemaHub
               </span>
               <span className="text-xs text-foreground/60 font-medium tracking-wide">Фильмы & Сериалы</span>
@@ -122,7 +122,7 @@ export default function Header() {
         </div>
 
         {/* Акцентная линия */}
-        <div className="mt-6 h-[1px] w-full bg-gradient-to-r from-transparent via-primary/20 via-30% to-transparent"></div>
+        <div className="mt-1 h-[1px] w-full bg-gradient-to-r from-transparent via-primary/20 via-30% to-transparent"></div>
       </nav>
     </header>
   );

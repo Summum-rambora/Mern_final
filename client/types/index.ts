@@ -21,6 +21,7 @@ export interface User {
   role: string;
   favoriteGenres: Genre[];
   favoriteMovies: Movie[];
+  reviews?: Review[];
 }
 
 export interface Review {
@@ -29,6 +30,7 @@ export interface Review {
   movie: Movie;
   rating: number;
   comment?: string;
+  createdAt: string;
 }
 
 export interface AuthPayload {

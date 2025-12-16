@@ -20,15 +20,78 @@ export default function MoviePage() {
     variables: { id },
   });
 
-  const { data: reviewsData, loading: reviewsLoading, refetch } = useQuery(GET_REVIEWS_BY_MOVIE, {
+  const { data: reviewsData, loading: reviewsLoading } = useQuery(GET_REVIEWS_BY_MOVIE, {
     variables: { movieId: id },
   });
 
   const [createReview, { loading: createLoading }] = useMutation(CREATE_REVIEW, {
+    optimisticResponse: {
+      createReview: {
+        __typename: 'Review',
+        id: `temp-${Date.now()}`, // Временный ID
+        rating,
+        comment,
+        createdAt: new Date().toISOString(), // Добавляем createdAt
+        user: {
+          __typename: 'User',
+          id: user?.id || '',
+          username: user?.username || '',
+        },
+        movie: {
+          __typename: 'Movie',
+          id,
+        },
+      },
+    },
+    update: (cache, { data }) => {
+      if (!data?.createReview) return;
+
+      // Обновляем список отзывов
+      const existingReviews: any = cache.readQuery({
+        query: GET_REVIEWS_BY_MOVIE,
+        variables: { movieId: id },
+      });
+
+      if (existingReviews) {
+        cache.writeQuery({
+          query: GET_REVIEWS_BY_MOVIE,
+          variables: { movieId: id },
+          data: {
+            reviewsByMovie: [...existingReviews.reviewsByMovie, data.createReview],
+          },
+        });
+      }
+
+      // Обновляем средний рейтинг фильма
+      const existingMovie: any = cache.readQuery({
+        query: GET_MOVIE,
+        variables: { id },
+      });
+
+      if (existingMovie?.movie) {
+        const allReviews = existingReviews?.reviewsByMovie || [];
+        const newReviewsList = [...allReviews, data.createReview];
+        
+        // Рассчитываем новый средний рейтинг
+        const newAvgRating = 
+          newReviewsList.reduce((sum: number, r: Review) => sum + r.rating, 0) / 
+          newReviewsList.length;
+
+        cache.writeQuery({
+          query: GET_MOVIE,
+          variables: { id },
+          data: {
+            movie: {
+              ...existingMovie.movie,
+              ratingAvg: newAvgRating,
+            },
+          },
+        });
+      }
+    },
     onCompleted: () => {
       setRating(5);
       setComment('');
-      refetch();
     },
   });
 
@@ -116,12 +179,14 @@ export default function MoviePage() {
             {movie.title.charAt(0)}
           </span>
           
-          {/* Рейтинг на изображении */}
+          {/* Рейтинг на изображении с анимацией обновления */}
           <div className="absolute top-6 right-6">
-            <div className="glass-card bg-black/60 backdrop-blur-sm px-6 py-3 rounded-2xl border border-primary/30">
+            <div className="glass-card bg-black/60 backdrop-blur-sm px-6 py-3 rounded-2xl border border-primary/30 transition-all duration-300 hover:scale-105">
               <div className="flex items-center gap-2">
                 <span className="text-yellow-400 text-2xl">★</span>
-                <span className="text-3xl font-bold text-white">{movie.ratingAvg.toFixed(1)}</span>
+                <span className="text-3xl font-bold text-white transition-all duration-500">
+                  {movie.ratingAvg.toFixed(1)}
+                </span>
                 <span className="text-white/70 text-lg">/10</span>
               </div>
             </div>
@@ -142,7 +207,9 @@ export default function MoviePage() {
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-primary"></div>
-                <span className="text-lg">{reviews.length} отзывов</span>
+                <span className="text-lg transition-all duration-300">
+                  {reviews.length} отзывов
+                </span>
               </div>
             </div>
           </div>
@@ -176,21 +243,25 @@ export default function MoviePage() {
             </p>
           </div>
 
-          {/* Статистика */}
+          {/* Статистика с анимированными значениями */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="glass-card p-5 text-center border border-border/30">
-              <div className="text-3xl font-bold gradient-text mb-2">{movie.ratingAvg.toFixed(1)}</div>
+            <div className="glass-card p-5 text-center border border-border/30 transition-all duration-300 hover:border-primary/30">
+              <div className="text-3xl font-bold gradient-text mb-2 transition-all duration-500">
+                {movie.ratingAvg.toFixed(1)}
+              </div>
               <div className="text-sm text-foreground/60">Средний рейтинг</div>
             </div>
-            <div className="glass-card p-5 text-center border border-border/30">
-              <div className="text-3xl font-bold gradient-text mb-2">{reviews.length}</div>
+            <div className="glass-card p-5 text-center border border-border/30 transition-all duration-300 hover:border-primary/30">
+              <div className="text-3xl font-bold gradient-text mb-2 transition-all duration-500">
+                {reviews.length}
+              </div>
               <div className="text-sm text-foreground/60">Всего отзывов</div>
             </div>
-            <div className="glass-card p-5 text-center border border-border/30">
+            <div className="glass-card p-5 text-center border border-border/30 transition-all duration-300 hover:border-primary/30">
               <div className="text-3xl font-bold gradient-text mb-2">{movie.duration}</div>
               <div className="text-sm text-foreground/60">Длительность (мин)</div>
             </div>
-            <div className="glass-card p-5 text-center border border-border/30">
+            <div className="glass-card p-5 text-center border border-border/30 transition-all duration-300 hover:border-primary/30">
               <div className="text-3xl font-bold gradient-text mb-2">{movie.releaseYear}</div>
               <div className="text-sm text-foreground/60">Год выпуска</div>
             </div>
@@ -206,7 +277,7 @@ export default function MoviePage() {
           </div>
           <div>
             <h2 className="text-3xl font-bold mb-1">Отзывы и рейтинги</h2>
-            <p className="text-foreground/70">
+            <p className="text-foreground/70 transition-all duration-300">
               {reviews.length} {reviews.length === 1 ? 'отзыв' : 
                 reviews.length % 10 >= 2 && reviews.length % 10 <= 4 ? 'отзыва' : 'отзывов'}
             </p>
@@ -222,36 +293,40 @@ export default function MoviePage() {
             </h3>
             
             {/* Рейтинг */}
-            <div className="mb-6">
+            <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <label className="text-foreground/80 font-medium">
                   Ваша оценка: <span className="text-primary font-bold text-xl">{rating}/10</span>
                 </label>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-yellow-500/10 to-yellow-500/5 border border-yellow-500/30">
                   <span className="text-yellow-400 text-xl">★</span>
-                  <span className="text-foreground/60 text-sm">({rating})</span>
+                  <span className="text-foreground/60 text-sm font-semibold">{rating} баллов</span>
                 </div>
               </div>
-              <div className="relative">
+              
+              <div className="relative px-1">
                 <input
                   type="range"
                   min="1"
                   max="10"
                   value={rating}
                   onChange={(e) => setRating(Number(e.target.value))}
-                  className="w-full h-3 bg-secondary rounded-full appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-r [&::-webkit-slider-thumb]:from-primary [&::-webkit-slider-thumb]:to-accent [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white"
+                  className="w-full"
+                  style={{
+                    '--range-progress': `${(rating / 10) * 100}%`
+                  } as React.CSSProperties}
                 />
-                <div className="flex justify-between text-xs text-foreground/50 mt-2">
-                  <span>1</span>
-                  <span>2</span>
-                  <span>3</span>
-                  <span>4</span>
-                  <span>5</span>
-                  <span>6</span>
-                  <span>7</span>
-                  <span>8</span>
-                  <span>9</span>
-                  <span>10</span>
+                <div className="flex justify-between text-xs text-foreground/50 mt-3 px-1">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                    <span 
+                      key={num}
+                      className={`transition-all duration-200 ${
+                        num <= rating ? 'text-primary font-bold scale-110' : ''
+                      }`}
+                    >
+                      {num}
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>
@@ -296,7 +371,7 @@ export default function MoviePage() {
           </form>
         )}
 
-        {/* Список отзывов */}
+        {/* Список отзывов с анимацией добавления */}
         {reviewsLoading ? (
           <div className="text-center py-12">
             <div className="inline-flex items-center gap-3">
@@ -339,7 +414,20 @@ export default function MoviePage() {
                     <div>
                       <h4 className="font-bold text-lg">{review.user.username}</h4>
                       <p className="text-foreground/60 text-sm">
-                        {new Date(review.createdAt).toLocaleDateString('ru-RU')}
+                        {review.id.startsWith('temp-') ? (
+                          <span className="text-primary/70 flex items-center gap-1">
+                            <span className="w-1 h-1 rounded-full bg-primary animate-pulse"></span>
+                            Публикуется...
+                          </span>
+                        ) : (
+                          new Date(review.createdAt).toLocaleDateString('ru-RU', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })
+                        )}
                       </p>
                     </div>
                   </div>

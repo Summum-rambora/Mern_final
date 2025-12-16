@@ -23,6 +23,7 @@ const typeDefs = gql`
     movie: Movie!
     rating: Int!
     comment: String
+    createdAt: String!
   }
 
   type User {
