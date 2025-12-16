@@ -12,6 +12,8 @@ export const movieResolver: IResolvers = {
     }
   },
   Mutation: {
+
+    
     createMovie: async (_: any, { input }: any) => {
       console.log('\n=== CREATING MOVIE ===');
       console.log('Input:', JSON.stringify(input, null, 2));
@@ -30,19 +32,19 @@ export const movieResolver: IResolvers = {
           movieAddedToFavoriteGenre: movieData
         };
         
-        console.log(`\n📢 PUBLISHING to "${NEW_MOVIE_IN_GENRE}"`);
+        console.log(`\nPUBLISHING to "${NEW_MOVIE_IN_GENRE}"`);
         console.log('Genre ID:', genre.id.toString());
         console.log('Movie:', { id: movieData.id, title: movieData.title });
         
         try {
           pubsub.publish(NEW_MOVIE_IN_GENRE, payload);
-          console.log('✅ Published successfully');
+          console.log('Published successfully');
         } catch (error) {
-          console.error('❌ Publish failed:', error);
+          console.error('Publish failed:', error);
         }
       });
 
-      console.log('=== END MOVIE CREATION ===\n');
+      console.log(' END MOVIE CREATION \n');
       
       return populatedMovie;
     }

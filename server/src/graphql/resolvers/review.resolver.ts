@@ -37,7 +37,6 @@ export const reviewResolver: IResolvers = {
           });
         } catch (error) {
           console.error('Error creating notification:', error);
-          // Продолжаем выполнение, даже если уведомление не создалось
         }
       }
 
