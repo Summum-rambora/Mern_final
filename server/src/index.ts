@@ -30,22 +30,19 @@ async function startServer() {
 
   const httpServer = createServer(app);
 
-  // WebSocket сервер для подписок
   const wsServer = new WebSocketServer({
     server: httpServer,
     path: '/graphql',
   });
 
-  // Настройка graphql-ws
   useServer(
     {
       schema,
       context: async (ctx) => {
-        // Получаем токен из connectionParams
         const token = (ctx.connectionParams as any)?.authorization?.replace('Bearer ', '') || '';
         
         if (!token) {
-          console.log('⚠️  WebSocket connection without token');
+          console.log(' WebSocket connection without token');
           return { user: null };
         }
 
@@ -54,31 +51,31 @@ async function startServer() {
           const user = await User.findById(decoded.id);
           
           if (user) {
-            console.log('✅ WebSocket authenticated:', user.username);
+            console.log('WebSocket authenticated:', user.username);
           }
           
           return { user };
         } catch (err) {
-          console.log('❌ WebSocket auth failed:', err);
+          console.log('WebSocket auth failed:', err);
           return { user: null };
         }
       },
       onConnect: (ctx) => {
-        console.log('🔌 WebSocket client connected');
+        console.log('WebSocket client connected');
       },
       onDisconnect: () => {
-        console.log('🔌 WebSocket client disconnected');
+        console.log('WebSocket client disconnected');
       },
       onError: (ctx, msg, errors) => {
-        console.error('❌ WebSocket error:', errors);
+        console.error('WebSocket error:', errors);
       },
     },
     wsServer
   );
 
   httpServer.listen(PORT, () => {
-    console.log(`🚀 HTTP Server running at http://localhost:${PORT}/graphql`);
-    console.log(`🚀 WebSocket Server ready at ws://localhost:${PORT}/graphql`);
+    console.log(`HTTP Server running at http://localhost:${PORT}/graphql`);
+    console.log(`WebSocket Server ready at ws://localhost:${PORT}/graphql`);
   });
 }
 
