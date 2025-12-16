@@ -38,9 +38,22 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center items-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600"></div>
+      <div className="container-smooth section-padding">
+        <div className="flex flex-col items-center justify-center min-h-[70vh]">
+          <div className="relative mb-8">
+            <div className="animate-spin rounded-full h-24 w-24 border-[4px] border-transparent border-t-primary border-r-accent"></div>
+            <div className="absolute inset-4 animate-ping rounded-full border-2 border-primary/20"></div>
+          </div>
+          <p className="text-foreground/70 text-xl font-semibold animate-pulse">Загрузка профиля...</p>
+          <div className="mt-6 flex gap-2">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className="w-3 h-3 rounded-full bg-gradient-to-br from-primary to-accent animate-bounce"
+                style={{ animationDelay: `${i * 0.1}s` }}
+              ></div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -60,35 +73,82 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        {/* User Info Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
-          <div className="flex items-center gap-6 mb-6">
-            <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-4xl font-bold">
-                {user.username.charAt(0).toUpperCase()}
-              </span>
+    <div className="container-smooth section-padding">
+      <div className="max-w-5xl mx-auto">
+        {/* Карточка пользователя */}
+        <div className="glass-card p-8 mb-10 border border-primary/20 shadow-glow animate-slide-down">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-8">
+            {/* Аватар */}
+            <div className="relative">
+              <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-primary via-accent to-primary-dark flex items-center justify-center shadow-inner-orange">
+                <span className="text-white text-5xl font-bold">
+                  {user.username.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div className="absolute -inset-4 bg-gradient-to-r from-primary to-accent rounded-2xl opacity-20 blur-xl"></div>
+              <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center border-4 border-secondary">
+                <span className="text-white text-lg">👑</span>
+              </div>
             </div>
             
-            <div>
-              <h1 className="text-3xl font-bold mb-2">{user.username}</h1>
-              <p className="text-gray-600 dark:text-gray-400">{user.email}</p>
-              <span className="inline-block mt-2 px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-sm">
-                {user.role}
-              </span>
+            {/* Информация */}
+            <div className="flex-1">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div>
+                  <h1 className="text-4xl md:text-5xl font-bold gradient-text mb-2">
+                    {user.username}
+                  </h1>
+                  <p className="text-foreground/70 text-lg">{user.email}</p>
+                </div>
+                
+                <span className="px-5 py-2.5 rounded-full bg-gradient-to-r from-primary/10 to-accent/10 text-primary border border-primary/30 font-semibold text-sm">
+                  {user.role}
+                </span>
+              </div>
+              
+              {/* Статистика */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="glass-card p-4 text-center border border-border/30">
+                  <p className="text-2xl font-bold gradient-text mb-1">
+                    {user.favoriteMovies?.length || 0}
+                  </p>
+                  <p className="text-sm text-foreground/60">Избранных фильмов</p>
+                </div>
+                <div className="glass-card p-4 text-center border border-border/30">
+                  <p className="text-2xl font-bold gradient-text mb-1">
+                    {user.favoriteGenres?.length || 0}
+                  </p>
+                  <p className="text-sm text-foreground/60">Любимых жанров</p>
+                </div>
+                <div className="glass-card p-4 text-center border border-border/30">
+                  <p className="text-2xl font-bold gradient-text mb-1">
+                    {user.reviews?.length || 0}
+                  </p>
+                  <p className="text-sm text-foreground/60">Написанных отзывов</p>
+                </div>
+              </div>
             </div>
           </div>
+          
+          {/* Акцентная линия */}
+          <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-primary/30 via-40% to-transparent"></div>
         </div>
 
-        {/* Favorite Genres Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-2xl font-bold mb-4">Любимые жанры</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Выберите жанры, чтобы получать уведомления о новых фильмах
-          </p>
+        {/* Любимые жанры */}
+        <div className="glass-card p-8 mb-10 border border-border/50 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center border border-primary/30">
+              <span className="text-primary text-2xl">🎭</span>
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold mb-1">Любимые жанры</h2>
+              <p className="text-foreground/70">
+                Выберите жанры, чтобы получать персонализированные рекомендации
+              </p>
+            </div>
+          </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-4 mb-8">
             {allGenres.map((genre) => {
               const isFavorite = favoriteGenreIds.includes(genre.id);
               
@@ -96,52 +156,114 @@ export default function ProfilePage() {
                 <button
                   key={genre.id}
                   onClick={() => handleToggleGenre(genre.id)}
-                  className={`px-4 py-2 rounded-lg transition-all ${
+                  className={`px-6 py-3.5 rounded-xl transition-all duration-300 transform hover:scale-105 ${
                     isFavorite
-                      ? 'bg-purple-600 text-white shadow-lg scale-105'
-                      : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
+                      ? 'bg-gradient-to-r from-primary to-accent text-white shadow-lg shadow-primary/30 hover:shadow-primary/40'
+                      : 'bg-secondary-light border border-border text-foreground/80 hover:border-primary/40 hover:bg-secondary'
                   }`}
                 >
-                  {isFavorite && '★ '}
-                  {genre.name}
+                  <div className="flex items-center gap-2">
+                    {isFavorite && (
+                      <span className="text-yellow-300 animate-pulse">★</span>
+                    )}
+                    <span className="font-medium">{genre.name}</span>
+                    {!isFavorite && (
+                      <span className="text-foreground/40 text-sm">+</span>
+                    )}
+                  </div>
                 </button>
               );
             })}
           </div>
 
           {user.favoriteGenres && user.favoriteGenres.length > 0 && (
-            <div className="mt-6 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-              <p className="text-sm text-purple-800 dark:text-purple-200">
-                ✓ Вы подписаны на {user.favoriteGenres.length} {
-                  user.favoriteGenres.length === 1 ? 'жанр' : 'жанра'
-                }. 
-                Вы будете получать уведомления о новых фильмах в этих жанрах!
-              </p>
+            <div className="glass-card p-5 border border-primary/30 bg-gradient-to-r from-primary/5 to-transparent">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-1">
+                  <span className="text-white text-sm">✓</span>
+                </div>
+                <div>
+                  <p className="font-medium text-primary mb-1">
+                    Вы подписаны на {user.favoriteGenres.length} {
+                      user.favoriteGenres.length === 1 ? 'жанр' : 'жанра'
+                    }
+                  </p>
+                  <p className="text-foreground/70 text-sm">
+                    Вы будете получать рекомендации и уведомления о новых фильмах в этих жанрах!
+                  </p>
+                </div>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Favorite Movies Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold mb-4">Избранные фильмы</h2>
+        {/* Избранные фильмы */}
+        <div className="glass-card p-8 border border-border/50 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center border border-primary/30">
+              <span className="text-primary text-2xl">🎬</span>
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold mb-1">Избранные фильмы</h2>
+              <p className="text-foreground/70">
+                Фильмы, которые вы добавили в избранное
+              </p>
+            </div>
+          </div>
           
           {user.favoriteMovies && user.favoriteMovies.length > 0 ? (
-            <div className="space-y-2">
-              {user.favoriteMovies.map((movie) => (
-                <div
+            <div className="space-y-4">
+              {user.favoriteMovies.map((movie, index) => (
+                <a
                   key={movie.id}
-                  className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  href={`/movies/${movie.id}`}
+                  className="group glass-card p-5 flex items-center justify-between hover-lift border border-transparent hover:border-primary/20 transition-all duration-300"
+                  style={{ animationDelay: `${index * 0.05}s` }}
                 >
-                  <a href={`/movies/${movie.id}`} className="font-medium hover:text-purple-600">
-                    {movie.title}
-                  </a>
-                </div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <span className="text-primary text-xl">🎥</span>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg group-hover:text-primary transition-colors duration-300">
+                        {movie.title}
+                      </h3>
+                      <p className="text-foreground/60 text-sm">
+                        {movie.releaseYear} • {movie.duration} мин
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1 bg-secondary px-3 py-1.5 rounded-full">
+                      <span className="text-yellow-400">★</span>
+                      <span className="font-semibold text-sm">{movie.ratingAvg.toFixed(1)}</span>
+                    </div>
+                    <span className="text-foreground/40 group-hover:text-primary transition-colors duration-300">
+                      →
+                    </span>
+                  </div>
+                </a>
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-8">
-              У вас пока нет избранных фильмов
-            </p>
+            <div className="text-center py-12">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center mx-auto mb-6">
+                <span className="text-4xl text-primary/50">📽️</span>
+              </div>
+              <h3 className="text-2xl font-bold mb-3 text-foreground/90">
+                У вас пока нет избранных фильмов
+              </h3>
+              <p className="text-foreground/70 mb-8 max-w-md mx-auto">
+                Открывайте новые фильмы и добавляйте их в избранное, чтобы вернуться к ним позже
+              </p>
+              <button
+                onClick={() => router.push('/')}
+                className="btn-primary px-8 py-3.5 text-lg"
+              >
+                Перейти в каталог
+              </button>
+            </div>
           )}
         </div>
       </div>
