@@ -1,3 +1,4 @@
+// models/User.ts
 import { Schema, model, Types } from 'mongoose';
 
 export interface IUser {
@@ -7,7 +8,9 @@ export interface IUser {
   role: 'USER' | 'ADMIN';
   favoriteGenres: Types.ObjectId[];
   favoriteMovies: Types.ObjectId[];
-  isDeleted: boolean; 
+  isDeleted: boolean;
+  createdAt: Date;    // ← добавьте это
+  updatedAt: Date;    // ← и это
 }
 
 const UserSchema = new Schema<IUser>(

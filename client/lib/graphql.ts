@@ -1,3 +1,4 @@
+// lib/graphql/index.ts
 import { gql } from '@apollo/client';
 
 export const GET_MOVIES = gql`
@@ -14,6 +15,7 @@ export const GET_MOVIES = gql`
         name
         slug
       }
+      isDeleted
     }
   }
 `;
@@ -32,6 +34,7 @@ export const GET_MOVIE = gql`
         name
         slug
       }
+      isDeleted
     }
   }
 `;
@@ -50,6 +53,7 @@ export const CREATE_MOVIE = gql`
         name
         slug
       }
+      isDeleted
     }
   }
 `;
@@ -207,3 +211,70 @@ export const MARK_ALL_AS_READ = gql`
     markAllNotificationsAsRead
   }
 `;
+
+// Добавьте GET_ALL_USERS
+export const GET_ALL_USERS = gql`
+  query GetAllUsers {
+    allUsers {
+      id
+      email
+      username
+      role
+      isDeleted
+      createdAt
+    }
+  }
+`;
+
+// Мутации для админ-панели
+export const DELETE_MOVIE = gql`
+  mutation DeleteMovie($id: ID!) {
+    deleteMovie(id: $id) {
+      id
+      title
+      isDeleted
+    }
+  }
+`;
+
+export const RESTORE_MOVIE = gql`
+  mutation RestoreMovie($id: ID!) {
+    restoreMovie(id: $id) {
+      id
+      title
+      isDeleted
+    }
+  }
+`;
+
+export const DELETE_USER = gql`
+  mutation DeleteUser($id: ID!) {
+    deleteUser(id: $id) {
+      id
+      email
+      isDeleted
+    }
+  }
+`;
+
+export const RESTORE_USER = gql`
+  mutation RestoreUser($id: ID!) {
+    restoreUser(id: $id) {
+      id
+      email
+      isDeleted
+    }
+  }
+`;
+
+export const UPDATE_USER_ROLE = gql`
+  mutation UpdateUserRole($id: ID!, $role: String!) {
+    updateUserRole(id: $id, role: $role) {
+      id
+      email
+      username
+      role
+    }
+  }
+`;
+

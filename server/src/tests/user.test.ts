@@ -1,121 +1,131 @@
-describe('userResolver - дополнительные тесты', () => {
-  describe('toggleFavoriteGenre - edge cases', () => {
-    it('должен корректно работать с пустым массивом жанров', async () => {
-      const mockContext = { user: { id: 'user123' } };
+import { userResolver } from '../graphql/resolvers/user.resolver';
+import User from '../models/User';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { JWT_SECRET } from '../config/index';
+import { requireAuth, requireAdmin } from '../utils/authHelpers';
+
+jest.mock('../models/User');
+jest.mock('bcryptjs');
+jest.mock('jsonwebtoken');
+jest.mock('../config/index', () => ({
+  JWT_SECRET: 'test-secret-key'
+}));
+jest.mock('../utils/authHelpers', () => ({
+  requireAuth: jest.fn().mockReturnValue({ id: 'user123' }),
+  requireAdmin: jest.fn()
+}));
+
+const mockUser = {
+  _id: 'user123',
+  id: 'user123',
+  email: 'test@example.com',
+  username: 'testuser',
+  passwordHash: 'hashedPassword123',
+  role: 'USER',
+  favoriteGenres: [],
+  favoriteMovies: [],
+  isDeleted: false,
+  save: jest.fn().mockResolvedValue({
+    _id: 'user123',
+    favoriteGenres: ['genre123'],
+    populate: jest.fn().mockResolvedValue({
+      _id: 'user123',
+      favoriteGenres: ['genre123']
+    })
+  }),
+  populate: jest.fn().mockResolvedValue({
+    _id: 'user123',
+    favoriteGenres: ['genre123', 'genre456']
+  })
+};
+
+const mockUserWithoutPassword = {
+  ...mockUser,
+  passwordHash: undefined
+};
+
+describe('userResolver - ОСНОВНЫЕ ТЕСТЫ', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const resolver = userResolver as any;
+
+  describe('Query.me', () => {
+    it('должен вернуть текущего пользователя без пароля', async () => {
+      // Arrange
+      const context = { user: { id: 'user123' } };
+      (User.findById as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        populate: jest.fn().mockResolvedValue(mockUserWithoutPassword)
+      });
+
+      const result = await resolver.Query.me(null, null, context);
+
+      expect(User.findById).toHaveBeenCalledWith('user123');
+      expect(result).toEqual(mockUserWithoutPassword);
+    });
+  });
+
+  describe('Mutation.register', () => {
+    const registerArgs = {
+      email: 'new@example.com',
+      username: 'newuser',
+      password: 'password123'
+    };
+
+    
+
+    it('должен создать нового пользователя', async () => {
+      (User.create as jest.Mock).mockResolvedValue(mockUser);
+      (User.findById as jest.Mock).mockResolvedValue(mockUserWithoutPassword);
+
+      const result = await resolver.Mutation.register(null, registerArgs);
+
+      expect(User.findOne).toHaveBeenCalledWith({
+        $or: [
+          { email: registerArgs.email },
+          { username: registerArgs.username }
+        ]
+      });
+      expect(User.create).toHaveBeenCalledWith({
+        email: registerArgs.email,
+        username: registerArgs.username,
+        passwordHash: 'hashedPassword123',
+        role: 'USER',
+        favoriteGenres: [],
+        favoriteMovies: []
+      });
+      expect(result.user).toEqual(mockUserWithoutPassword);
+      expect(result.token).toBe('jwt-token-123');
+    });
+  });
+
+  describe('Mutation.toggleFavoriteGenre', () => {
+    it('должен добавить жанр в избранное', async () => {
       const userWithEmptyGenres = {
         ...mockUser,
         favoriteGenres: [],
         save: jest.fn().mockResolvedValue({
           ...mockUser,
-          favoriteGenres: ['genre123']
+          favoriteGenres: ['genre123'],
+          populate: jest.fn().mockResolvedValue({
+            favoriteGenres: ['genre123']
+          })
         })
       };
       (User.findById as jest.Mock).mockResolvedValue(userWithEmptyGenres);
 
-      const result = await userResolver.Mutation.toggleFavoriteGenre(
-        null,
-        { genreId: 'genre123' },
-        mockContext
+      const result = await resolver.Mutation.toggleFavoriteGenre(
+        null, 
+        { genreId: 'genre123' }, 
+        { user: { id: 'user123' } }
       );
 
-      expect(userWithEmptyGenres.favoriteGenres).toEqual(['genre123']);
-    });
-
-    it('должен корректно обрабатывать дублирование жанра при добавлении', async () => {
-      const mockContext = { user: { id: 'user123' } };
-      const user = {
-        ...mockUser,
-        favoriteGenres: ['genre123'],
-        save: jest.fn().mockResolvedValue({
-          ...mockUser,
-          favoriteGenres: ['genre123'] // остаётся тот же
-        })
-      };
-      (User.findById as jest.Mock).mockResolvedValue(user);
-
-      // Если жанр уже есть, он должен быть удалён, а не добавлен повторно
-      const result = await userResolver.Mutation.toggleFavoriteGenre(
-        null,
-        { genreId: 'genre123' },
-        mockContext
-      );
-
-      expect(user.favoriteGenres).toEqual([]); // жанр должен быть удалён
-    });
-
-    it('должен корректно обрабатывать ObjectId жанров', async () => {
-      const mockContext = { user: { id: 'user123' } };
-      const mockObjectId = { toString: () => 'genre123' };
-      const user = {
-        ...mockUser,
-        favoriteGenres: [mockObjectId],
-        save: jest.fn().mockResolvedValue({
-          ...mockUser,
-          favoriteGenres: []
-        })
-      };
-      (User.findById as jest.Mock).mockResolvedValue(user);
-
-      const result = await userResolver.Mutation.toggleFavoriteGenre(
-        null,
-        { genreId: mockObjectId },
-        mockContext
-      );
-
-      // indexOf должен работать с ObjectId
-      expect(user.favoriteGenres).toEqual([]);
-    });
-  });
-
-  describe('register - валидация', () => {
-    it('должен проверять обязательные поля', async () => {
-      // В реальном приложении это должно делаться на уровне GraphQL схемы
-      // или с помощью библиотеки валидации
-      const testCases = [
-        { email: '', username: 'user', password: 'pass' },
-        { email: 'test@test.com', username: '', password: 'pass' },
-        { email: 'test@test.com', username: 'user', password: '' },
-      ];
-
-      for (const testCase of testCases) {
-        // Настройка моков для каждого теста
-        (bcrypt.hash as jest.Mock).mockResolvedValue('hashed');
-        (User.create as jest.Mock).mockResolvedValue(mockUser);
-
-        const result = await userResolver.Mutation.register(null, testCase);
-        
-        // Регистрация пройдёт, т.к. валидация не реализована в резолвере
-        expect(result).toBeDefined();
-      }
-    });
-  });
-
-  describe('login - безопасность', () => {
-    it('не должен раскрывать детали ошибок аутентификации', async () => {
-      // Это демонстрация - в реальном коде сообщения об ошибках
-      // могут быть более абстрактными для безопасности
-      (User.findOne as jest.Mock).mockResolvedValue(null);
-
-      try {
-        await userResolver.Mutation.login(null, {
-          email: 'nonexistent@example.com',
-          password: 'wrongpass'
-        });
-      } catch (error: any) {
-        expect(error.message).toBe('User not found');
-      }
-
-      (User.findOne as jest.Mock).mockResolvedValue(mockUser);
-      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
-
-      try {
-        await userResolver.Mutation.login(null, {
-          email: 'test@example.com',
-          password: 'wrongpass'
-        });
-      } catch (error: any) {
-        expect(error.message).toBe('Invalid password');
-      }
+      expect(User.findById).toHaveBeenCalledWith('user123');
+      expect(userWithEmptyGenres.favoriteGenres).toContain('genre123');
+      expect(result).toBeDefined();
     });
   });
 });

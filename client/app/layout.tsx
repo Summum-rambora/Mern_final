@@ -14,24 +14,22 @@ export const metadata: Metadata = {
   description: "Современный каталог фильмов с отзывами, рейтингами и персонализированными рекомендациями",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru" className={inter.variable}>
       <head>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>" />
+        <link
+          rel="icon"
+          href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>"
+        />
         <meta name="theme-color" content="#f97316" />
       </head>
       <body className={`${inter.className} antialiased bg-black text-white`}>
         <ApolloWrapper>
+    
+
           <Header />
-          
-          <main className="min-h-screen">
-            {children}
-          </main>
+          <main className="min-h-screen">{children}</main>
 
           <footer className="border-t border-zinc-800 bg-zinc-900">
             <div className="container mx-auto px-4 py-8">
@@ -42,7 +40,6 @@ export default function RootLayout({
                   </div>
                   <span className="text-lg font-bold text-orange-500">CinemaHub</span>
                 </div>
-                
                 <p className="text-zinc-500 text-sm">
                   © {new Date().getFullYear()} CinemaHub. Все права защищены.
                 </p>

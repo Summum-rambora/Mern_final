@@ -6,7 +6,15 @@
     "dev": "ts-node-dev src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "test": "jest"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:resolvers": "jest src/graphql/resolvers --coverage",
+    "test:user": "jest user.resolver.test.ts",
+    "test:movie": "jest movie.resolver.test.ts",
+    "test:review": "jest review.resolver.test.ts",
+    "test:notification": "jest notification.resolver.test.ts",
+    "test:subscription": "jest subscription.resolver.test.ts"
   },
   "keywords": [],
   "author": "",
@@ -25,12 +33,15 @@
     "subscriptions-transport-ws": "^0.11.0"
   },
   "devDependencies": {
+    "@jest/types": "^30.2.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/express": "^4.17.21",
     "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/mongodb-memory-server": "^1.8.0",
     "@types/node": "^25.0.2",
     "jest": "^30.2.0",
+    "mongodb-memory-server": "^11.0.0",
     "supertest": "^7.1.4",
     "ts-jest": "^29.4.6",
     "ts-node-dev": "^2.0.0",

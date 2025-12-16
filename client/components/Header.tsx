@@ -14,20 +14,20 @@ export default function Header() {
     skip: !isAuthenticated || !hydrated,
   });
 
-  
   useEffect(() => {
     setHydrated();
     setMounted(true);
   }, [setHydrated]);
 
-  
   useEffect(() => {
     if (data?.me) {
       setUser(data.me);
     }
   }, [data, setUser]);
 
-  
+  // Проверяем является ли пользователь админом
+  const isAdmin = user?.role === 'ADMIN';
+
   if (!mounted || !hydrated) {
     return (
       <header className="sticky top-0 z-50 bg-secondary/95 backdrop-blur-xl border-b border-border/50 shadow-glow">
@@ -104,19 +104,36 @@ export default function Header() {
 
             {isAuthenticated ? (
               <div className="flex items-center">
-                {/* Добавить фильм */}
-                <div className="mr-8">
-                  <Link
-                    href="/movies/create"
-                    className="relative text-foreground/80 hover:text-primary transition-all duration-300 group"
-                  >
-                    <span className="text-base font-medium px-4 py-2.5 rounded-xl hover:bg-secondary-light/30 transition-all duration-300">
-                      Добавить фильм
-                    </span>
-                    <span className="absolute -bottom-1 left-4 right-4 w-auto h-[2px] bg-gradient-to-r from-primary to-accent opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full"></span>
-                  </Link>
-                </div>
-                
+                {/* Добавить фильм - ТОЛЬКО ДЛЯ АДМИНОВ */}
+                {isAdmin && (
+                  <div className="mr-8">
+                    <Link
+                      href="/movies/create"
+                      className="relative text-foreground/80 hover:text-primary transition-all duration-300 group"
+                    >
+                      <span className="text-base font-medium px-4 py-2.5 rounded-xl hover:bg-secondary-light/30 transition-all duration-300">
+                        Добавить фильм
+                      </span>
+                      <span className="absolute -bottom-1 left-4 right-4 w-auto h-[2px] bg-gradient-to-r from-primary to-accent opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full"></span>
+                    </Link>
+                  </div>
+                )}
+
+                {/* Панель админа - ТОЛЬКО ДЛЯ АДМИНОВ */}
+                {isAdmin && (
+                  <div className="mr-8">
+                    <Link
+                      href="/admin"
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600/10 to-purple-500/10 border border-purple-500/20 hover:border-purple-500/40 hover:bg-purple-500/15 transition-all duration-300 group"
+                    >
+                      <span className="text-purple-400 text-lg">👑</span>
+                      <span className="text-base font-medium text-foreground/80 group-hover:text-purple-300">
+                        Панель админа
+                      </span>
+                    </Link>
+                  </div>
+                )}
+
                 {/* Профиль */}
                 <div className="mr-8">
                   <Link
@@ -124,14 +141,29 @@ export default function Header() {
                     className="flex items-center gap-3 text-foreground/80 hover:text-primary transition-all duration-300 group"
                   >
                     <div className="relative">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border-2 border-primary/30 flex items-center justify-center group-hover:border-primary/50 transition-all duration-300 shadow-inner-orange">
-                        <span className="text-primary font-bold text-base">
+                      <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center group-hover:border-primary/50 transition-all duration-300 shadow-inner-orange ${
+                        isAdmin 
+                          ? 'bg-gradient-to-br from-purple-500/20 to-purple-600/20 border-purple-400/40' 
+                          : 'bg-gradient-to-br from-primary/20 to-accent/20 border-primary/30'
+                      }`}>
+                        <span className={`font-bold text-base ${
+                          isAdmin ? 'text-purple-400' : 'text-primary'
+                        }`}>
                           {user?.username?.charAt(0).toUpperCase() || '?'}
                         </span>
                       </div>
-                      <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-full opacity-0 group-hover:opacity-20 blur-sm transition-all duration-300"></div>
+                      <div className={`absolute -inset-1 rounded-full opacity-0 group-hover:opacity-20 blur-sm transition-all duration-300 ${
+                        isAdmin 
+                          ? 'bg-gradient-to-r from-purple-500 to-purple-600' 
+                          : 'bg-gradient-to-r from-primary to-accent'
+                      }`}></div>
                     </div>
-                    <span className="text-base font-medium">Профиль</span>
+                    <div className="flex flex-col">
+                      <span className="text-base font-medium">{user?.username}</span>
+                      {isAdmin && (
+                        <span className="text-xs text-purple-400 font-semibold mt-0.5">Администратор</span>
+                      )}
+                    </div>
                   </Link>
                 </div>
                 
