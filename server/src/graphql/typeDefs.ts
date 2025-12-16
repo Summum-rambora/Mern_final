@@ -53,6 +53,7 @@ const typeDefs = gql`
     isDeleted: Boolean!
     createdAt: String!
     updatedAt: String!
+    user: User!
   }
 
   input MovieInput {
@@ -81,6 +82,7 @@ const typeDefs = gql`
     title: String!
     message: String!
     payload: String
+    
   }
 
   type AuthPayload {
@@ -94,7 +96,7 @@ const typeDefs = gql`
     genres: [Genre!]!
     reviewsByMovie(movieId: ID!): [Review!]!
     me: User
-    notifications: [Notification!]!
+    myNotifications: [Notification!]!
     unreadNotificationsCount: Int!
   }
 
@@ -109,6 +111,7 @@ const typeDefs = gql`
     markAllNotificationsAsRead: Boolean!
     deleteNotification(id: ID!): Notification!
     toggleFavoriteGenre(genreId: ID!): User!
+    toggleFavoriteMovie(movieId: ID!): User!
   }
 
   type Subscription {

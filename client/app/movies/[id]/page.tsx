@@ -243,7 +243,7 @@ export default function MoviePage() {
             </p>
           </div>
 
-          {/* Статистика с анимированными значениями */}
+          {/* Статистика */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="glass-card p-5 text-center border border-border/30 transition-all duration-300 hover:border-primary/30">
               <div className="text-3xl font-bold gradient-text mb-2 transition-all duration-500">

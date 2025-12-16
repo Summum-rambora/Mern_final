@@ -157,3 +157,53 @@ export const TOGGLE_FAVORITE_GENRE = gql`
     }
   }
 `;
+
+export const TOGGLE_FAVORITE_MOVIE = gql`
+  mutation ToggleFavoriteMovie($movieId: ID!) {
+    toggleFavoriteMovie(movieId: $movieId) {
+      id
+      favoriteMovies {
+        id
+        title
+        releaseYear
+        duration
+        ratingAvg
+      }
+    }
+  }
+`;
+
+export const GET_MY_NOTIFICATIONS = gql`
+  query GetMyNotifications {
+    myNotifications {
+      id
+      type
+      title
+      message
+      payload
+      isRead
+      createdAt
+    }
+  }
+`;
+
+export const UNREAD_NOTIFICATIONS_COUNT = gql`
+  query UnreadNotificationsCount {
+    unreadNotificationsCount
+  }
+`;
+
+export const MARK_NOTIFICATION_AS_READ = gql`
+  mutation MarkNotificationAsRead($id: ID!) {
+    markNotificationAsRead(id: $id) {
+      id
+      isRead
+    }
+  }
+`;
+
+export const MARK_ALL_AS_READ = gql`
+  mutation MarkAllNotificationsAsRead {
+    markAllNotificationsAsRead
+  }
+`;

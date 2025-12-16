@@ -9,26 +9,41 @@ import { Genre } from '@/types';
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { isAuthenticated, user, setUser } = useAuthStore();
+  const { isAuthenticated, user, setUser, hydrated, setHydrated } = useAuthStore();
+
+  useEffect(() => {
+    setHydrated();
+  }, [setHydrated]);
 
   const { data, loading, refetch } = useQuery(GET_ME, {
-    skip: !isAuthenticated,
+    skip: !isAuthenticated || !hydrated,
+    fetchPolicy: 'network-only',
   });
 
   const { data: genresData } = useQuery(GET_GENRES);
 
-  const [toggleFavoriteGenre] = useMutation(TOGGLE_FAVORITE_GENRE, {
+  const [toggleFavoriteGenre, { loading: toggleLoading }] = useMutation(TOGGLE_FAVORITE_GENRE, {
+    refetchQueries: [GET_ME],
     onCompleted: (data) => {
-      setUser(data.toggleFavoriteGenre);
+      
+      if (data?.toggleFavoriteGenre) {
+        setUser(data.toggleFavoriteGenre);
+      }
+      
       refetch();
     },
+    onError: (error) => {
+      console.error('Error toggling favorite genre:', error);
+    }
   });
 
   useEffect(() => {
+    if (!hydrated) return;
+    
     if (!isAuthenticated) {
       router.push('/auth/login');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, hydrated]);
 
   useEffect(() => {
     if (data?.me) {
@@ -36,7 +51,7 @@ export default function ProfilePage() {
     }
   }, [data, setUser]);
 
-  if (loading) {
+  if (!hydrated || loading) {
     return (
       <div className="container-smooth section-padding">
         <div className="flex flex-col items-center justify-center min-h-[70vh]">
@@ -67,9 +82,13 @@ export default function ProfilePage() {
   const favoriteGenreIds = user.favoriteGenres?.map((g) => g.id) || [];
 
   const handleToggleGenre = async (genreId: string) => {
-    await toggleFavoriteGenre({
-      variables: { genreId },
-    });
+    try {
+      await toggleFavoriteGenre({
+        variables: { genreId },
+      });
+    } catch (error) {
+      console.error('Failed to toggle genre:', error);
+    }
   };
 
   return (
@@ -79,17 +98,7 @@ export default function ProfilePage() {
         <div className="glass-card p-8 mb-10 border border-primary/20 shadow-glow animate-slide-down">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-8">
             {/* Аватар */}
-            <div className="relative">
-              <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-primary via-accent to-primary-dark flex items-center justify-center shadow-inner-orange">
-                <span className="text-white text-5xl font-bold">
-                  {user.username.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <div className="absolute -inset-4 bg-gradient-to-r from-primary to-accent rounded-2xl opacity-20 blur-xl"></div>
-              <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center border-4 border-secondary">
-                <span className="text-white text-lg">👑</span>
-              </div>
-            </div>
+            
             
             {/* Информация */}
             <div className="flex-1">
@@ -156,7 +165,8 @@ export default function ProfilePage() {
                 <button
                   key={genre.id}
                   onClick={() => handleToggleGenre(genre.id)}
-                  className={`px-6 py-3.5 rounded-xl transition-all duration-300 transform hover:scale-105 ${
+                  disabled={toggleLoading}
+                  className={`px-6 py-3.5 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${
                     isFavorite
                       ? 'bg-gradient-to-r from-primary to-accent text-white shadow-lg shadow-primary/30 hover:shadow-primary/40'
                       : 'bg-secondary-light border border-border text-foreground/80 hover:border-primary/40 hover:bg-secondary'

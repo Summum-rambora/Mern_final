@@ -2,21 +2,70 @@
 
 import Link from 'next/link';
 import { useAuthStore } from '@/store/auth';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@apollo/client/react';
 import { GET_ME } from '@/lib/graphql';
 
 export default function Header() {
-  const { user, isAuthenticated, logout, setUser } = useAuthStore();
+  const { user, isAuthenticated, logout, setUser, hydrated, setHydrated } = useAuthStore();
+  const [mounted, setMounted] = useState(false);
+  
   const { data } = useQuery(GET_ME, {
-    skip: !isAuthenticated,
+    skip: !isAuthenticated || !hydrated,
   });
 
+  
+  useEffect(() => {
+    setHydrated();
+    setMounted(true);
+  }, [setHydrated]);
+
+  
   useEffect(() => {
     if (data?.me) {
       setUser(data.me);
     }
   }, [data, setUser]);
+
+  
+  if (!mounted || !hydrated) {
+    return (
+      <header className="sticky top-0 z-50 bg-secondary/95 backdrop-blur-xl border-b border-border/50 shadow-glow">
+        <nav className="container-smooth py-3">
+          <div className="flex items-center justify-between">
+            {/* Логотип */}
+            <Link href="/" className="flex items-center gap-4 group">
+              <div className="relative">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center transform group-hover:rotate-12 transition-transform duration-500 shadow-inner-orange">
+                  <span className="text-white text-3xl font-bold">🎬</span>
+                </div>
+                <div className="absolute -inset-2 bg-gradient-to-r from-primary to-accent rounded-2xl opacity-0 group-hover:opacity-30 blur-md transition-all duration-500"></div>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-2xl font-bold bg-gradient-to-r from-[#FF5722] via-[#FF9800] to-[#FF5722] bg-clip-text text-transparent">
+                  CinemaHub
+                </span>
+                <span className="text-xs text-foreground/60 font-medium tracking-wide">Фильмы & Сериалы</span>
+              </div>
+            </Link>
+
+            {/* Скелетон навигации */}
+            <div className="flex items-center">
+              <div className="mr-6">
+                <div className="w-20 h-8 bg-secondary-light/30 rounded-xl animate-pulse"></div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-24 h-8 bg-secondary-light/30 rounded-xl animate-pulse"></div>
+                <div className="w-28 h-10 bg-secondary-light/30 rounded-xl animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-1 h-[1px] w-full bg-gradient-to-r from-transparent via-primary/20 via-30% to-transparent"></div>
+        </nav>
+      </header>
+    );
+  }
 
   return (
     <header className="sticky top-0 z-50 bg-secondary/95 backdrop-blur-xl border-b border-border/50 shadow-glow">
@@ -77,7 +126,7 @@ export default function Header() {
                     <div className="relative">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border-2 border-primary/30 flex items-center justify-center group-hover:border-primary/50 transition-all duration-300 shadow-inner-orange">
                         <span className="text-primary font-bold text-base">
-                          {user?.username?.charAt(0).toUpperCase()}
+                          {user?.username?.charAt(0).toUpperCase() || '?'}
                         </span>
                       </div>
                       <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-full opacity-0 group-hover:opacity-20 blur-sm transition-all duration-300"></div>
